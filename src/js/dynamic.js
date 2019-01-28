@@ -1,6 +1,6 @@
 
 function test(str) {
-  console.log('123123');
+  console.log('123123111');
   console.log(str);
 }
 
