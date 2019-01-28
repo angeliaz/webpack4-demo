@@ -1,0 +1,12 @@
+p {
+  font-size: 20px;
+  color: #ff0;
+}
+p {
+  background: url(../images/newer.b1a293ab.png);
+}
+.test {
+  border: 5px black solid;
+  color: lime;
+}
+

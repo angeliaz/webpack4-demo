@@ -8,15 +8,10 @@ const terserPlugin = require('terser-webpack-plugin');
 const optimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const bundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-const merge = require('webpack-merge');
-
 const glob = require('glob');
 
-
-console.log(22222, process.env.NODE_ENV);
-
 function resolve(dir) {
-  return path.resolve(__dirname,  dir);
+  return path.resolve(__dirname, dir)
 }
 
 function recursiveIssuer(m) {
@@ -53,8 +48,7 @@ const config = {
     // 所有输出文件的目标路径
     // filename: '[name].js',
     // webpack 如何输出结果的相关选项
-    path: resolve('../dist'),
-    chunkFilename: 'js/[name].[hash:8].js'
+    path: resolve('dist'),
     // 处理静态文件路径，可用于配置cdn等资源文件
     // publicPath: '//stdl.qq.com/stdl/skin/10/assets/',
     // 「入口分块(entry chunk)」的文件名模板,知道如何寻找图片等资源
@@ -68,28 +62,35 @@ const config = {
         test:/\.(htm|html)$/,
         use: ['html-withimg-loader']
       }, {
-        test: /\.(css|less)$/, // css资源加载
+        test: /\.(sa|le|sc|c)ss$/, // css资源加载
         use: [{
           loader: miniCssExtractPlugin.loader,
-            options: {
-              publicPath: '../'
-            }
-          }, {
-            loader: 'css-loader',
-            options: {
-              importLoaders: 1,
-              sourceMap: true
-            }
-          }, {loader: 'less-loader'}
-        ], // load从右向左加载
-        // include: [resolve('src')],
-      },
+          options: {
+            publicPath: '../'
+          }
+        }, {
+          loader: 'css-loader',
+          options: {
+            sourceMap: true
+          }
+        }, {loader: 'less-loader'}], // load从右向左加载
+        include: [resolve('src')],
+      }, /* {
+        test: /\.(css|scss)$/, // css资源加载
+        use: ['style-loader', {
+          loader: 'css-loader',
+          options: {
+            modules: true
+          }
+        }], // load从右向左加载
+        include: [resolve('src')],
+      }, */ 
       // Babel可以直接在webpack.config.js中进行配置, 但是考虑到babel具有非常多的配置选项
       {
         test: /\.js$/,
         loader: ['babel-loader'],
         include: [resolve('src'), resolve('test')], // 匹配特定条件。
-        // exclude: [resolve('build')] // 排除特定条件
+        exclude: [] // 排除特定条件
       }, {
         test: /\.(png|jpe?g|gif|svg)$/,
         loader: 'url-loader',
@@ -105,10 +106,14 @@ const config = {
   // 模块和资源的转换工作由 loader 来处理，除此之外的其他任何工作都可以交由 plugin 来完成。
   plugins: [
     // new bundleAnalyzerPlugin(),
+    // 启用 HMR
+    new webpack.HotModuleReplacementPlugin({
+      // Options...
+    }),
     // 清除文件
     new cleanWebpackPlugin(
-      [resolve('../dist')], {
-        root: path.resolve(__dirname, '../'),
+      [resolve('dist'), resolve('build')], {
+        root: __dirname,
         // 排除
         exclude:  ['test.html'],
         // Write logs to console.
@@ -163,6 +168,16 @@ const config = {
       components: path.resolve(__dirname, './src/components'),
     }
   }, */
+  devServer: {
+    host: 'tq.qq.com',
+    port: 80,
+    contentBase: path.join(__dirname, 'dist'),
+    open: false,
+    hot: false,
+    disableHostCheck: true,
+    proxy: {},
+    before () {}
+  },
   optimization: {
     minimizer: [
       new terserPlugin({ // 压缩js
@@ -175,8 +190,6 @@ const config = {
         }
       })
     ],
-    usedExports: true,
-    sideEffects: true
     // 配置css合并打包的方式
     /* splitChunks: {
       cacheGroups: {
@@ -225,7 +238,6 @@ const htmlConfig = [{
 // 示例2: 多个webpack文件[动态读取]
 const html = glob.sync('src/*.html').map(path => {
   let name = path.match(/([\w-_]+)(?=.html)/)[1];
-  console.log('~~~~~', path, name)
   config.plugins.push(new htmlWebpackPlugin({
     title: 'testooo',
     template: path,
